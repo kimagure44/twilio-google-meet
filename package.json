@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "twilio-google-met",
   "version": "0.1.0",
   "private": true,
   "scripts": {

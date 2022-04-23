@@ -1,5 +1,31 @@
 <template>
-  <v-container fluid class="grey darken-3 fill-height align-start">
+  <v-container fluid class="black fill-height align-start">
+    <v-navigation-drawer right app v-model="sidebar">
+      <template v-slot:prepend>
+        <v-list-item two-line>
+          <v-list-item-avatar>
+            <img src="https://randomuser.me/api/portraits/women/81.jpg" />
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title>Jane Smith</v-list-item-title>
+            <v-list-item-subtitle>Logged In</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+      <v-divider></v-divider>
+      <v-list dense>
+        <v-list-item v-for="item in items" :key="item.title">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
     <v-row class="text-center">
       <v-col cols="12">
         <v-text-field
@@ -8,14 +34,14 @@
           solo
           flat
           readonly
-          background-color="grey darken-2"
+          background-color="grey darken-3"
         >
         </v-text-field>
       </v-col>
       <v-col cols="12">
         <v-card
           class="ma-auto"
-          color="black"
+          color="grey darken-3"
           outlined
           v-for="(user, index) in users"
           :key="`video-${index}`"
@@ -107,6 +133,7 @@ export default {
     return {
       audio: false,
       video: false,
+      sidebar: false,
       actionButtons: {
         microphone: {
           key: 'microphone',
@@ -135,13 +162,13 @@ export default {
           key: 'chat',
           tooltip: 'Show chat',
           icon: 'mdi-comment-text-outline',
-          cb: () => {},
+          cb: this.showSidebar,
         },
         users: {
           key: 'users',
           tooltip: 'Show users',
           icon: 'mdi-account-multiple-outline',
-          cb: () => {},
+          cb: this.showSidebar,
         },
       },
       users: new Array(1).fill(0).map((_, index) => ({
@@ -149,9 +176,17 @@ export default {
         video: true,
         audio: true,
       })),
+      items: [
+        { title: 'Home', icon: 'mdi-home-city' },
+        { title: 'My Account', icon: 'mdi-account' },
+        { title: 'Users', icon: 'mdi-account-group-outline' },
+      ],
     };
   },
   methods: {
+    showSidebar() {
+      this.sidebar = !this.sidebar;
+    },
     colorStatus(status) {
       return status ? 'grey darken-2' : 'red darken-2';
     },
@@ -175,13 +210,13 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 * {
   overflow: hidden !important;
 }
 video {
   width: 100%;
-  height: 100%;
+  max-height: 77vh;
 }
 .action-buttons {
   min-height: 70px;

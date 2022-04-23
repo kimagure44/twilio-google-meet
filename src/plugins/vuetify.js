@@ -10,4 +10,7 @@ export default new Vuetify({
     locales: { es },
     current: 'es',
   },
+  icons: {
+    iconfont: 'mdi',
+  },
 });

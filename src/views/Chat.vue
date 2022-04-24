@@ -199,7 +199,7 @@ export default {
       this.statusButton(key, this.video);
     },
     statusButton(key, status) {
-      const iKey = this.links[key];
+      const iKey = this.actionButtons[key];
       iKey.icon = buttonStatus(key, status);
       iKey.tooltip = status ? 'Activated' : 'Deactivated';
       iKey.status = status;

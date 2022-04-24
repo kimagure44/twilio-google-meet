@@ -6,6 +6,7 @@ import vuetify from './plugins/vuetify';
 import '@babel/polyfill';
 
 Vue.config.productionTip = false;
+Vue.prototype.$EventBus = new Vue();
 
 new Vue({
   router: router,

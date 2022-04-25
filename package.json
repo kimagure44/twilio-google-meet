@@ -5,11 +5,17 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "vue-cli-service build && mkdir dist\\assets && copy dist\\index.html dist\\assets && twilio serverless:deploy --service-name vue-twilio-serverless --cwd serverless --assets-folder ../dist"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "core-js": "^3.6.5",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.2",
+    "prismjs": "^1.6.0",
+    "stackblur-canvas": "^1.4.0",
+    "twilio": "^3.19.1",
     "twilio-video": "^2.21.1",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",

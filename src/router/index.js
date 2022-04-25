@@ -13,6 +13,7 @@ const routes = [
   {
     path: '/chat',
     name: 'Chat',
+    props: true,
     component: () => import(/* webpackChunkName: "chat" */ '../views/Chat.vue'),
   },
 ];

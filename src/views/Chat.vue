@@ -1,115 +1,122 @@
 <template>
   <v-container fluid class="black fill-height align-start">
-    <v-navigation-drawer right app v-model="sidebar">
-      <template v-slot:prepend>
-        <v-list-item two-line>
-          <v-list-item-avatar>
-            <img src="https://randomuser.me/api/portraits/women/81.jpg" />
-          </v-list-item-avatar>
+    <template v-if="connected">
+      <v-navigation-drawer right app v-model="sidebar">
+        <template v-slot:prepend>
+          <v-list-item two-line>
+            <v-list-item-avatar>
+              <img src="https://randomuser.me/api/portraits/women/81.jpg" />
+            </v-list-item-avatar>
 
-          <v-list-item-content>
-            <v-list-item-title>Jane Smith</v-list-item-title>
-            <v-list-item-subtitle>Logged In</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
-      <v-divider></v-divider>
-      <v-list dense>
-        <v-list-item v-for="item in items" :key="item.title">
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-text-field
-          filled
-          dense
-          solo
-          flat
-          readonly
-          background-color="grey darken-3"
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="12">
-        <v-card
-          class="ma-auto"
-          color="grey darken-3"
-          outlined
-          v-for="(user, index) in users"
-          :key="`video-${index}`"
-        >
-          <v-list-item class="pa-0">
-            <video src=""></video>
+            <v-list-item-content>
+              <v-list-item-title>Jane Smith</v-list-item-title>
+              <v-list-item-subtitle>Logged In</v-list-item-subtitle>
+            </v-list-item-content>
           </v-list-item>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-footer
-      color="transparent"
-      absolute
-      min-width="100%"
-      padless
-      class="mb-3"
-      min-height="70px"
-    >
-      <v-row justify="space-between" class="mx-3">
-        <div class="align-center d-flex white--text justify-start">
-          Room title
-        </div>
-        <div class="action-buttons d-flex align-center">
-          <v-tooltip
-            top
-            v-for="({ icon, tooltip, key, cb, status }, index) in actionButtons"
-            :key="`action-btn-${index}`"
+        </template>
+        <v-divider></v-divider>
+        <v-list dense>
+          <v-list-item v-for="item in items" :key="item.title">
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+      <v-row class="text-center">
+        <v-col cols="12">
+          <v-text-field
+            filled
+            dense
+            solo
+            flat
+            readonly
+            background-color="grey darken-3"
           >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                :color="colorStatus(status)"
-                fab
-                small
-                dark
-                v-on="on"
-                v-bind="attrs"
-                @click="cb(key)"
-                class="mx-2"
-              >
-                <v-icon normal>{{ icon }}</v-icon>
-              </v-btn>
-            </template>
-            <span v-text="tooltip" />
-          </v-tooltip>
-        </div>
-        <div class="align-center d-flex white--text justify-start">
-          <v-tooltip
-            top
-            v-for="({ icon, tooltip, key, cb }, index) in sidebarActions"
-            :key="`sidebar-btn-${index}`"
+          </v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-card
+            class="ma-auto"
+            color="grey darken-3"
+            outlined
+            v-for="(user, index) in users"
+            :key="`video-${index}`"
           >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                color="grey darken-2"
-                icon
-                v-on="on"
-                v-bind="attrs"
-                @click="cb(key)"
-                class="mx-2"
-              >
-                <v-icon normal>{{ icon }}</v-icon>
-              </v-btn>
-            </template>
-            <span v-text="tooltip" />
-          </v-tooltip>
-        </div>
+            <v-list-item class="pa-0">
+              <video src=""></video>
+            </v-list-item>
+          </v-card>
+        </v-col>
       </v-row>
-    </v-footer>
+      <v-footer
+        color="transparent"
+        absolute
+        min-width="100%"
+        padless
+        class="mb-3"
+        min-height="70px"
+      >
+        <v-row justify="space-between" class="mx-3">
+          <div class="align-center d-flex white--text justify-start">
+            Room title
+          </div>
+          <div class="action-buttons d-flex align-center">
+            <v-tooltip
+              top
+              v-for="(
+                { icon, tooltip, key, cb, status }, index
+              ) in actionButtons"
+              :key="`action-btn-${index}`"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  :color="colorStatus(status)"
+                  fab
+                  small
+                  dark
+                  v-on="on"
+                  v-bind="attrs"
+                  @click="cb(key)"
+                  class="mx-2"
+                >
+                  <v-icon normal>{{ icon }}</v-icon>
+                </v-btn>
+              </template>
+              <span v-text="tooltip" />
+            </v-tooltip>
+          </div>
+          <div class="align-center d-flex white--text justify-start">
+            <v-tooltip
+              top
+              v-for="({ icon, tooltip, key, cb }, index) in sidebarActions"
+              :key="`sidebar-btn-${index}`"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="grey darken-2"
+                  icon
+                  v-on="on"
+                  v-bind="attrs"
+                  @click="cb(key)"
+                  class="mx-2"
+                >
+                  <v-icon normal>{{ icon }}</v-icon>
+                </v-btn>
+              </template>
+              <span v-text="tooltip" />
+            </v-tooltip>
+          </div>
+        </v-row>
+      </v-footer>
+    </template>
+    <template v-else>
+      <h1 class="white--text">Access not allowed</h1>
+    </template>
   </v-container>
 </template>
 
@@ -129,6 +136,16 @@ const buttonStatus = (key, status) => ICON[key][status ? 'on' : 'off'];
 
 export default {
   name: 'Home',
+  props: {
+    username: {
+      type: String,
+      default: '',
+    },
+    connected: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       audio: false,
@@ -205,7 +222,7 @@ export default {
       iKey.status = status;
     },
     hangup() {
-      console.log('Hangup');
+      this.$router.push({ name: 'Login' });
     },
   },
 };

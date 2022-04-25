@@ -1,6 +1,7 @@
 <template>
   <v-container fluid class="black fill-height align-start">
     <template v-if="connected">
+      <div class="white--text">{{ room }}</div>
       <v-navigation-drawer right app v-model="sidebar">
         <template v-slot:prepend>
           <v-list-item two-line>
@@ -115,7 +116,11 @@
       </v-footer>
     </template>
     <template v-else>
-      <h1 class="white--text">Access not allowed</h1>
+      <div
+        class="container d-flex fill-height align-center justify-center container--fluid"
+      >
+        <h1 class="white--text">Access not allowed</h1>
+      </div>
     </template>
   </v-container>
 </template>
@@ -144,6 +149,10 @@ export default {
     connected: {
       type: Boolean,
       default: false,
+    },
+    room: {
+      type: Object,
+      default: () => {},
     },
   },
   data() {
@@ -201,6 +210,11 @@ export default {
     };
   },
   methods: {
+    redirect() {
+      setTimeout(() => {
+        this.$router.push({ name: 'Login' });
+      }, 3000);
+    },
     showSidebar() {
       this.sidebar = !this.sidebar;
     },
@@ -224,6 +238,9 @@ export default {
     hangup() {
       this.$router.push({ name: 'Login' });
     },
+  },
+  mounted() {
+    this.redirect();
   },
 };
 </script>

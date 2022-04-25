@@ -5,11 +5,13 @@
     id="login-container"
   >
     <v-row class="d-flex align-start justify-center">
-      <v-col cols="12" class="d-flex justify-start align-center">
-        <v-icon x-large color="info">mdi-message-video</v-icon>
-        <span class="info--text text-center ml-3 text-uppercase"
-          >Tecnops Meet</span
-        >
+      <v-col
+        cols="12"
+        class="d-flex justify-center align-start header col col-12 pt-10"
+      >
+        <v-icon x-large color="white" class="logotype">
+          mdi-message-video
+        </v-icon>
       </v-col>
       <v-form
         ref="form"
@@ -18,19 +20,25 @@
         @submit.prevent="onSubmit"
       >
         <v-col cols="12" class="d-flex justify-center align-center">
-          <v-card class="mx-auto" max-width="400px" elevation="7">
-            <div class="px-4 pt-4" ref="local-video" />
-            <v-card-title class="d-flex align-start ma-0">
+          <v-card class="mx-auto custom-card" max-width="450px" elevation="12">
+            <div
+              class="mx-4 mt-4 local-video-thumb blue lighten-4 d-flex justify-center align-center"
+              v-if="videoLoading"
+            >
+              <v-progress-circular
+                :size="90"
+                :width="3"
+                color="white"
+                indeterminate
+              ></v-progress-circular>
+            </div>
+            <div class="px-4 pt-4 local-video" v-else ref="local-video" />
+            <v-card-title class="d-flex align-center ma-0 justify-center">
               <v-text-field
                 v-model="username"
                 :rules="nameRules"
-                label="Name"
+                label="Username"
                 required
-                filled
-                dense
-                solo
-                flat
-                background-color="grey darken-1"
                 class="mr-2"
               />
               <v-btn
@@ -47,29 +55,14 @@
         </v-col>
       </v-form>
     </v-row>
-    <!-- FROM -->
-    <div class="TEST">
-      <form id="form">
-        Name: <input id="username" placeholder="Type your username..." />
-        <button id="join">Join Call</button>
-      </form>
-      <p v-text="count" />
-      <div ref="container">
-        <div id="local" class="participant">
-          <div>Yo</div>
-        </div>
-        <!-- al resto de participantes -->
-      </div>
-    </div>
-    <!-- TO -->
   </v-container>
 </template>
 <script>
 import Twilio from 'twilio-video';
 const USER_MINLENGTH = 6;
-const requiredName = (v) => !!v || 'Name is required';
+const requiredName = (v) => !!v || 'Username is required';
 const minimunName = (v) =>
-  (v && v.length > USER_MINLENGTH) || 'Name must have minimum 6 characters';
+  (v && v.length > USER_MINLENGTH) || 'Username must have minimum 6 characters';
 
 export default {
   name: 'LoginView',
@@ -81,12 +74,17 @@ export default {
       isConnected: false,
       room: null,
       count: 0,
+      videoLoading: true,
     };
   },
   methods: {
     async addLocalVideo() {
       const track = await Twilio.createLocalVideoTrack();
-      this.$refs['local-video'].appendChild(track.attach());
+      console.log(track);
+      this.videoLoading = false;
+      this.$nextTick(() => {
+        this.$refs['local-video'].appendChild(track.attach());
+      });
     },
     async onSubmit() {
       this.$refs.form.validate();
@@ -95,14 +93,17 @@ export default {
           this.disconnect();
           return;
         }
-        this.isConnected = true;
-        this.$router.push({
-          name: 'Chat',
-          params: { username: this.username, connected: this.isConnected },
-        });
+        this.$router.push({ name: 'Chat' });
         try {
           await this.connect({ username: this.username });
-          // this.$router.push({ name: 'Chat' });
+          this.$router.push({
+            name: 'Chat',
+            params: {
+              username: this.username,
+              connected: this.isConnected,
+              room: this.room,
+            },
+          });
         } catch (e) {
           console.error(e);
           alert('Failed to connect');
@@ -164,8 +165,42 @@ export default {
 </script>
 
 <style lang="scss">
-video {
-  width: 100%;
-  border-radius: 5px;
+#login-container {
+  .local-video {
+    width: 350px;
+    height: 265px;
+  }
+  .local-video-thumb {
+    width: 316px;
+    height: 237px;
+    border-radius: 5px;
+  }
+  video {
+    border-radius: 5px;
+    width: 100%;
+    height: auto;
+    background: #000000;
+  }
+  .header {
+    height: 40vh;
+    background: rgba(0, 86, 245, 1);
+    background: linear-gradient(
+      135deg,
+      rgba(0, 86, 245, 1) 0%,
+      rgba(39, 179, 230, 1) 100%
+    );
+    .logotype {
+      font-size: 6rem !important;
+      background: #00a2ff;
+      padding: 40px;
+      border-radius: 30% 10%;
+      box-shadow: 7px 7px 14px -2px rgba(0, 0, 0, 0.2);
+    }
+  }
+  .custom-card {
+    top: 30vh;
+    min-height: 320px;
+    position: absolute;
+  }
 }
 </style>

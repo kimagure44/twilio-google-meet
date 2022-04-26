@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="black fill-height align-start">
+  <v-container fluid class="grey fill-height align-start chat">
     <template v-if="connected">
       <div class="white--text">{{ room }}</div>
       <v-navigation-drawer right app v-model="sidebar">
@@ -8,7 +8,6 @@
             <v-list-item-avatar>
               <img src="https://randomuser.me/api/portraits/women/81.jpg" />
             </v-list-item-avatar>
-
             <v-list-item-content>
               <v-list-item-title>Jane Smith</v-list-item-title>
               <v-list-item-subtitle>Logged In</v-list-item-subtitle>
@@ -28,42 +27,33 @@
           </v-list-item>
         </v-list>
       </v-navigation-drawer>
-      <v-row class="text-center">
+      <v-row class="text-center video-container">
         <v-col cols="12">
-          <v-text-field
-            filled
-            dense
-            solo
-            flat
-            readonly
-            background-color="grey darken-3"
-          >
-          </v-text-field>
-        </v-col>
-        <v-col cols="12">
-          <v-card
-            class="ma-auto"
-            color="grey darken-3"
-            outlined
-            v-for="(user, index) in users"
-            :key="`video-${index}`"
-          >
-            <v-list-item class="pa-0">
-              <video src=""></video>
-            </v-list-item>
-          </v-card>
+          <div class="chat-grid">
+            <v-card
+              class="ma-auto custom-card"
+              color="black"
+              outlined
+              v-for="(user, index) in users"
+              :key="`video-${index}`"
+            >
+              <v-list-item class="pa-0">
+                <video src=""></video>
+              </v-list-item>
+            </v-card>
+          </div>
         </v-col>
       </v-row>
       <v-footer
-        color="transparent"
+        color="white"
         absolute
         min-width="100%"
         padless
-        class="mb-3"
-        min-height="70px"
+        elevation="8"
+        min-height="94px"
       >
         <v-row justify="space-between" class="mx-3">
-          <div class="align-center d-flex white--text justify-start">
+          <div class="align-center d-flex black--text justify-start">
             Room title
           </div>
           <div class="action-buttons d-flex align-center">
@@ -126,19 +116,7 @@
 </template>
 
 <script>
-const ICON = {
-  microphone: {
-    on: 'mdi-microphone',
-    off: 'mdi-microphone-off',
-  },
-  video: {
-    on: 'mdi-video',
-    off: 'mdi-video-off',
-  },
-};
-
-const buttonStatus = (key, status) => ICON[key][status ? 'on' : 'off'];
-
+import { buttonStatus } from '@/helpers';
 export default {
   name: 'Home',
   props: {
@@ -197,7 +175,7 @@ export default {
           cb: this.showSidebar,
         },
       },
-      users: new Array(1).fill(0).map((_, index) => ({
+      users: new Array(2).fill(0).map((_, index) => ({
         name: `User ${index}`,
         video: true,
         audio: true,
@@ -240,7 +218,7 @@ export default {
     },
   },
   mounted() {
-    this.redirect();
+    !this.connected && this.redirect();
   },
 };
 </script>
@@ -248,11 +226,25 @@ export default {
 * {
   overflow: hidden !important;
 }
-video {
-  width: 100%;
-  max-height: 77vh;
-}
-.action-buttons {
-  min-height: 70px;
+.chat {
+  video {
+    width: 100%;
+    height: 100%;
+  }
+  .action-buttons {
+    min-height: 70px;
+  }
+  .chat-grid {
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  .video-container {
+  }
+
+  .custom-card {
+    width: 100%;
+  }
 }
 </style>

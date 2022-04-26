@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Login from '../views/Login.vue';
+import Login from '@/views/login.vue';
 
 Vue.use(VueRouter);
 
@@ -14,7 +14,7 @@ const routes = [
     path: '/chat',
     name: 'Chat',
     props: true,
-    component: () => import(/* webpackChunkName: "chat" */ '../views/Chat.vue'),
+    component: () => import(/* webpackChunkName: "chat" */ '@/views/chat.vue'),
   },
 ];
 

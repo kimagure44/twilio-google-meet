@@ -7,9 +7,9 @@
     <v-row class="d-flex align-start justify-center">
       <v-col
         cols="12"
-        class="d-flex justify-center align-start header col col-12 pt-10"
+        class="d-flex justify-center align-end header col col-12 pt-10 grey"
       >
-        <v-icon x-large color="white" class="logotype">
+        <v-icon large color="black" class="logotype white">
           mdi-message-video
         </v-icon>
       </v-col>
@@ -22,7 +22,7 @@
         <v-col cols="12" class="d-flex justify-center align-center">
           <v-card class="mx-auto custom-card" max-width="450px" elevation="12">
             <div
-              class="mx-4 mt-4 local-video-thumb blue lighten-4 d-flex justify-center align-center"
+              class="mx-4 mt-4 local-video-thumb black d-flex justify-center align-center"
               v-if="videoLoading"
             >
               <v-progress-circular
@@ -36,65 +36,102 @@
             <v-card-title class="d-flex align-center ma-0 justify-center">
               <v-text-field
                 v-model="username"
-                :rules="nameRules"
+                :rules="usernameRules"
                 label="Username"
                 required
                 class="mr-2"
+                placeholder="Username"
               />
-              <v-btn
-                :disabled="!isValidForm"
-                color="info"
-                icon
-                large
-                type="submit"
-              >
-                <v-icon>mdi-login</v-icon>
-              </v-btn>
             </v-card-title>
           </v-card>
         </v-col>
       </v-form>
     </v-row>
+    <v-snackbar
+      v-model="notify"
+      :timeout="4000"
+      absolute
+      top
+      right
+      tile
+      :color="stautsNotify"
+    >
+      {{ notifyMessage }}
+      <template v-slot:action="{ attrs }">
+        <v-btn color="white" icon v-bind="attrs" @click="notify = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 <script>
-import Twilio from 'twilio-video';
-const USER_MINLENGTH = 6;
-const requiredName = (v) => !!v || 'Username is required';
-const minimunName = (v) =>
-  (v && v.length > USER_MINLENGTH) || 'Username must have minimum 6 characters';
-
+import { validations } from '@/helpers';
 export default {
   name: 'LoginView',
   data() {
     return {
       isValidForm: false,
       username: '',
-      nameRules: [requiredName, minimunName],
+      usernameRules: [
+        validations.requiredUsername,
+        validations.minLengthUsername,
+      ],
       isConnected: false,
       room: null,
       count: 0,
       videoLoading: true,
+      notify: false,
+      notifyType: 'success',
+      notifyMessage: '',
+      hasDevice: false,
     };
   },
+  computed: {
+    stautsNotify() {
+      return `accent-4 rounded ${
+        this.notifyType === 'success' ? 'green' : 'red'
+      }`;
+    },
+  },
   methods: {
+    showNotify({ success, message }) {
+      this.notifyType = success ? 'success' : 'error';
+      this.notifyMessage = message;
+      this.notify = true;
+    },
     async addLocalVideo() {
-      const track = await Twilio.createLocalVideoTrack();
-      console.log(track);
-      this.videoLoading = false;
-      this.$nextTick(() => {
+      try {
+        const track = await this.$Twilio.createLocalVideoTrack();
+        this.videoLoading = false;
+        this.hasDevice = true;
+        await this.$nextTick();
         this.$refs['local-video'].appendChild(track.attach());
-      });
+      } catch (error) {
+        this.hasDevice = false;
+        this.showNotify({ success: false, message: error.message });
+      }
     },
     async onSubmit() {
       this.$refs.form.validate();
       if (this.username.length && this.isValidForm) {
-        if (this.isConnected) {
-          this.disconnect();
-          return;
-        }
-        this.$router.push({ name: 'Chat' });
         try {
+          this.isConnected = true;
+          this.$router.push({
+            name: 'Chat',
+            params: {
+              username: this.username,
+              connected: this.isConnected,
+              room: this.room,
+            },
+          });
+          if (this.isConnected) {
+            this.disconnect();
+            return;
+          }
+          if (!this.hasDevice) {
+            throw new Error('Requested device not found');
+          }
           await this.connect({ username: this.username });
           this.$router.push({
             name: 'Chat',
@@ -104,9 +141,8 @@ export default {
               room: this.room,
             },
           });
-        } catch (e) {
-          console.error(e);
-          alert('Failed to connect');
+        } catch (error) {
+          this.showNotify({ success: false, message: error.message });
         }
       }
     },
@@ -124,7 +160,7 @@ export default {
         body: JSON.stringify({ username }),
       };
       const { token } = await (await fetch('/get_tokens', params)).json();
-      this.room = await Twilio.connect(token);
+      this.room = await this.$Twilio.connect(token);
       this.room.participants.forEach(this.participantConnected);
       this.room.on('participantConnected', this.participantConnected);
       this.room.on('participantDisconnected', this.participantDisconnected);
@@ -170,6 +206,14 @@ export default {
     width: 350px;
     height: 265px;
   }
+  .blue-gradient {
+    background: rgba(0, 86, 245, 1);
+    background: linear-gradient(
+      135deg,
+      rgba(0, 86, 245, 1) 0%,
+      rgba(39, 179, 230, 1) 100%
+    );
+  }
   .local-video-thumb {
     width: 316px;
     height: 237px;
@@ -183,18 +227,14 @@ export default {
   }
   .header {
     height: 40vh;
-    background: rgba(0, 86, 245, 1);
-    background: linear-gradient(
-      135deg,
-      rgba(0, 86, 245, 1) 0%,
-      rgba(39, 179, 230, 1) 100%
-    );
+
     .logotype {
-      font-size: 6rem !important;
-      background: #00a2ff;
-      padding: 40px;
-      border-radius: 30% 10%;
-      box-shadow: 7px 7px 14px -2px rgba(0, 0, 0, 0.2);
+      font-size: 2rem !important;
+      padding: 25px;
+      z-index: 1;
+      bottom: 66px;
+      border-radius: 100px 100px 0 0;
+      height: 25px;
     }
   }
   .custom-card {

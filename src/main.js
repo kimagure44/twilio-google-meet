@@ -5,7 +5,9 @@ import store from './store';
 import vuetify from './plugins/vuetify';
 import '@babel/polyfill';
 import Twilio from 'twilio-video';
+import Notify from '@/components/notify';
 
+Vue.component('Notify', Notify);
 Vue.config.productionTip = false;
 Vue.prototype.$EventBus = new Vue();
 Vue.prototype.$Twilio = Twilio;

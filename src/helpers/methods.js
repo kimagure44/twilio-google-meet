@@ -1,14 +1,4 @@
-const USER_MINLENGTH = 6;
-const ICON = {
-  microphone: {
-    on: 'mdi-microphone',
-    off: 'mdi-microphone-off',
-  },
-  video: {
-    on: 'mdi-video',
-    off: 'mdi-video-off',
-  },
-};
+import { ICON, USER_MINLENGTH } from './definitions';
 
 export const validations = {
   requiredUsername: (payload) => !!payload || 'Username is required',

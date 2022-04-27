@@ -47,26 +47,22 @@
         </v-col>
       </v-form>
     </v-row>
-    <v-snackbar
-      v-model="notify"
-      :timeout="4000"
-      absolute
-      top
-      right
-      tile
-      :color="stautsNotify"
-    >
-      {{ notifyMessage }}
-      <template v-slot:action="{ attrs }">
-        <v-btn color="white" icon v-bind="attrs" @click="notify = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </template>
-    </v-snackbar>
+    <v-row class="mt-12">
+      <v-col cols="12" class="d-flex justify-center align-center">
+        <v-alert dense type="info">
+          Total user in chat: {{ getTotalUsers }}
+        </v-alert>
+      </v-col>
+    </v-row>
+    <notify :show="configNotify.show" :type="configNotify.type">
+      {{ configNotify.message }}
+    </notify>
   </v-container>
 </template>
 <script>
-import { validations } from '@/helpers';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { validations } from '@/helpers/methods';
+
 export default {
   name: 'LoginView',
   data() {
@@ -79,26 +75,27 @@ export default {
       ],
       isConnected: false,
       room: null,
-      count: 0,
       videoLoading: true,
-      notify: false,
-      notifyType: 'success',
-      notifyMessage: '',
       hasDevice: false,
+      configNotify: {
+        show: false,
+        type: 'success',
+        message: '',
+      },
     };
   },
   computed: {
-    stautsNotify() {
-      return `accent-4 rounded ${
-        this.notifyType === 'success' ? 'green' : 'red'
-      }`;
-    },
+    ...mapGetters(['getTotalUsers']),
   },
   methods: {
+    ...mapActions(['getTokenTwilio']),
+    ...mapMutations(['setTotalUser']),
     showNotify({ success, message }) {
-      this.notifyType = success ? 'success' : 'error';
-      this.notifyMessage = message;
-      this.notify = true;
+      Object.assign(this.configNotify, {
+        show: true,
+        type: success ? 'success' : 'error',
+        message,
+      });
     },
     async addLocalVideo() {
       try {
@@ -116,6 +113,7 @@ export default {
       this.$refs.form.validate();
       if (this.username.length && this.isValidForm) {
         try {
+          /*
           this.isConnected = true;
           this.$router.push({
             name: 'Chat',
@@ -125,14 +123,15 @@ export default {
               room: this.room,
             },
           });
+          */
           if (this.isConnected) {
             this.disconnect();
             return;
           }
           if (!this.hasDevice) {
-            throw new Error('Requested device not found');
+            // throw new Error('Requested device not found');
           }
-          await this.connect({ username: this.username });
+          await this.connect(this.username);
           this.$router.push({
             name: 'Chat',
             params: {
@@ -149,26 +148,16 @@ export default {
     disconnect() {
       this.room.disconnect();
       this.isConnected = false;
-      this.updateParticipantCount();
+      this.setTotalUser = this.room.participants.size + 1;
     },
-    async connect({ username }) {
-      const params = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      };
-      const { token } = await (await fetch('/get_tokens', params)).json();
+    async connect(username) {
+      const token = await this.getTokenTwilio(username);
       this.room = await this.$Twilio.connect(token);
       this.room.participants.forEach(this.participantConnected);
       this.room.on('participantConnected', this.participantConnected);
       this.room.on('participantDisconnected', this.participantDisconnected);
       this.isConnected = true;
-      this.updateParticipantCount();
-    },
-    updateParticipantCount() {
-      this.count = `${this.room.participants.size + 1} online users`;
+      this.setTotalUser = this.room.participants.size + 1;
     },
     participantConnected(participant) {
       const template = `<div id='participant-${participant.id}' class="participant">
@@ -182,7 +171,7 @@ export default {
       });
       participant.on('trackSubscribed', this.attachTrack);
       participant.on('trackUnsubscribed', (track) => track.detach());
-      this.updateParticipantCount();
+      this.setTotalUser = this.room.participants.size + 1;
     },
     participantDisconnected(participant) {
       console.log('participant disconnected', participant);

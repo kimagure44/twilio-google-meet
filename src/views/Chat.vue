@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import { buttonStatus } from '@/helpers';
+import { buttonStatus } from '@/helpers/methods';
 export default {
   name: 'Home',
   props: {
